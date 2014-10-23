@@ -1,0 +1,11 @@
+<html>
+<head>
+	<link href="{{ url_for('static', filename='friendly.css') }}" rel="stylesheet" type="text/css">
+	<link rel="stylesheet" type="text/css" href="https://raw.githubusercontent.com/richleland/pygments-css/master/friendly.css">
+</head>
+<body>
+{% highlight 'irc' %}
+{{ log }}
+{% endhighlight %}
+</body>
+</html>

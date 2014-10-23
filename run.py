@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from flask import Flask, send_from_directory, render_template
+from flask import Flask, send_from_directory, render_template, url_for
 from urllib.parse import quote_plus
 import sys, os
 class Network():
@@ -26,28 +26,8 @@ class Log():
 		self.url  = url
 
 app = Flask(__name__)
-html_tree = '''<html><head><style>
-.tree, .tree ul{
-  font: normal normal 14px/20px Helvetica, Arial, sans-serif;
-  list-style-type: none; margin-left: 0 0 0 10px;
-  padding: 0; position: relative; overflow:hidden;
-}
-.tree li{ margin: 0; padding: 0 12px; position: relative; }
-.tree li::before, .tree li::after{ content: ''; position: absolute; left: 0; }
-
-/* horizontal line on inner list items */
-.tree li::before{ border-top: 1px solid #999; top: 10px; width: 10px; height: 0; }
-
-/* vertical line on list items */
-.tree li:after{ border-left: 1px solid #999; height: 100%; width: 0px; top: -10px; }
-
-/* lower line on list items from the first level because they don't have parents */
-.tree > li::after{ top: 10px; }
-
-/* hide line from the last of the first level list items */
-.tree > li:last-child::after{ display: none; }
-.tree ul:last-child li:last-child:after{ height:20px; }
-</style></head><body><ul class="tree">'''
+app.jinja_env.add_extension('jinja2_highlight.HighlightExtension')
+app.jinja_env.extend(jinja2_highlight_cssclass = 'codehilite')
 
 def get_files(directory):
 	files = os.listdir(directory)
@@ -106,30 +86,16 @@ def channel_logs(network_name, channel_name):
 	network = Network(network_name, network_url, [channel])
 	return(render_template('show_channel.html', network=network, channel=channel, url=url))
 
-@app.route('/<network>/<channel>/<log_file>')
-def get_log(network, channel, log_file):
+@app.route('/<network_name>/<channel_name>/<log_file>')
+def get_log(network_name, channel_name, log_file):
 	log_dir = '/home/kyrias/znc_logs'
-	return send_from_directory(os.path.join(log_dir, network, channel), log_file)
+	with open(os.path.join(log_dir, network_name, channel_name, log_file), 'rb') as file:
+		log = file.read().decode('utf-8', 'ignore')
+	return(render_template('log.html', log=log))
 
-def main():
-	print(arguments)
-	if arguments['<network>'] and not arguments['<channel>']:
-		channels = get_files(os.path.join(log_dir, arguments['<network>']))
-		for c in channels:
-			print(c)
-
-	elif arguments['<channel>']:
-		files = get_files(os.path.join(log_dir, arguments['<network>'], arguments['<channel>']))
-		for f in files:
-			print(f)
-
-	else:
-		networks = get_files(log_dir)
-		for n in networks:
-			print(n)
-			channels = get_files(os.path.join(log_dir, n))
-			for c in channels:
-				print('\t', c)
+@app.route('/static/<path:filename>')
+def send_static(filename):
+	return send_from_directory('static', filename)
 
 if __name__ == '__main__':
 	app.run(port=7000, debug=True)
