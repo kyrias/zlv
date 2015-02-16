@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from flask import Flask, send_from_directory, render_template, url_for
+from flask_kerberos import init_kerberos
 from classes import Network, Channel, Log
 from urllib.parse import quote_plus
 import sys, os
@@ -9,6 +10,18 @@ app.config.from_pyfile('application.cfg', silent=True)
 
 app.jinja_env.add_extension('jinja2_highlight.HighlightExtension')
 app.jinja_env.extend(jinja2_highlight_cssclass = 'codehilite')
+
+if not "KRB5_KTNAME" in os.environ:
+	try:
+		os.environ['KRB5_KTNAME'] = app.config['KRB5_KTNAME']
+	except KeyError:
+		print("Error: No KEYTAB specified in config and \
+				KRB5_KTNAME envvar not set",
+				file=sys.stderr)
+		sys.exit(1)
+
+init_kerberos(app)
+
 
 def get_files(directory):
 	files = os.listdir(directory)
