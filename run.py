@@ -30,6 +30,7 @@ def get_files(directory):
 
 @app.route('/')
 def index():
+	authenticated()
 	networks = []
 	for network_name in get_files(app.config['ZNC_LOG_DIR']):
 		network_url = '{}/{}'.format(app.config['URL'], network_name)
@@ -45,6 +46,7 @@ def index():
 
 @app.route('/<network_name>')
 def get_network(network_name):
+	authenticated()
 	network_url = '{}/{}'.format(app.config['URL'], network_name)
 
 	channels = []
@@ -59,6 +61,7 @@ def get_network(network_name):
 
 @app.route('/<network_name>/<channel_name>')
 def channel_logs(network_name, channel_name):
+	authenticated()
 	network_url = '{}/{}'.format(app.config['URL'], network_name)
 	channel_url = '{}/{}'.format(network_url, quote_plus(channel_name))
 
@@ -75,6 +78,7 @@ def channel_logs(network_name, channel_name):
 
 @app.route('/<network_name>/<channel_name>/<log_file>')
 def get_log(network_name, channel_name, log_file):
+	authenticated()
 	with open(os.path.join(app.config['ZNC_LOG_DIR'], network_name, channel_name, log_file), 'rb') as file:
 		log = file.read().decode('utf-8', 'ignore')
 	return(render_template('log.html', log=log))
