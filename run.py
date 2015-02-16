@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from flask import Flask, send_from_directory, render_template, url_for
-from flask_kerberos import init_kerberos
+from flask_kerberos import init_kerberos, requires_authentication
 from classes import Network, Channel, Log
 from urllib.parse import quote_plus
 import sys, os
@@ -82,6 +82,21 @@ def get_log(network_name, channel_name, log_file):
 @app.route('/static/<path:filename>')
 def send_static(filename):
 	return send_from_directory('static', filename)
+
+@app.route('/login')
+@requires_authentication
+def login(principal):
+	if principal == 'kyrias@KYRIASIS.COM':
+		session['logged_in'] = True
+
+	else:
+		session.pop('logged_in', None)
+		return abort(401)
+
+	if session['logged_in']:
+		return '''
+		Logged in! <a href="/">index</a>
+		'''
 
 if __name__ == '__main__':
 	app.run(port=app.config['PORT'])
