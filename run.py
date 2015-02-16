@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from flask import Flask, send_from_directory, render_template, url_for
+from flask import Flask, send_from_directory, render_template, session, abort
 from flask_kerberos import init_kerberos, requires_authentication
 from classes import Network, Channel, Log
 from urllib.parse import quote_plus
@@ -97,6 +97,12 @@ def login(principal):
 		return '''
 		Logged in! <a href="/">index</a>
 		'''
+
+def authenticated():
+	if not session.get('logged_in'):
+		abort(401)
+	else:
+		return True
 
 if __name__ == '__main__':
 	app.run(port=app.config['PORT'])
