@@ -71,6 +71,4 @@ def send_static(filename):
 	return send_from_directory('static', filename)
 
 if __name__ == '__main__':
-	app.run(port=7000, debug=True)
-#    arguments = docopt(__doc__)
-#    main()
+	app.run(port=app.config['PORT'])
