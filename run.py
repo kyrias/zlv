@@ -108,5 +108,9 @@ def authenticated():
 	else:
 		return True
 
+@app.route('/favicon.ico')
+def favicon():
+	return abort(404)
+
 if __name__ == '__main__':
 	app.run(port=app.config['PORT'])
